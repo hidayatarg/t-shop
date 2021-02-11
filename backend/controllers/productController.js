@@ -3,6 +3,8 @@ const getAllProductsQuery = "SELECT * FROM products ORDER BY id DESC";
 const createProductQuery =
   "INSERT INTO products (name, price, description, rating, category_id, seller_id, stock_amount, created_date, created_by, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7, Now(), $8, true) RETURNING *";
 const getProductByIdQuery = "SELECT * FROM products WHERE id = $1";
+const updateProductByIdQuery =
+  "UPDATE products SET name = $1, price = $2, description = $3, rating = $4, category_id = $5, seller_id = $6, stock_amount = $7, updated_date = Now(), updated_by = $8, is_active = true WHERE id = $9 RETURNING *";
 
 // GetAllProducts => api/v1/products
 const getAllProducts = async (req, res, next) => {
@@ -70,8 +72,43 @@ const getSingleProductById = async (req, res, next) => {
   }
 };
 
+const updateProductById = async (req, res, next) => {
+  const id = parseInt(req.params.id);
+  const {
+    name,
+    price,
+    description,
+    rating,
+    category_id,
+    seller_id,
+    stock_amount,
+    updated_by,
+  } = req.body;
+
+  try {
+    const result = await pool.query(updateProductByIdQuery, [
+      name,
+      price,
+      description,
+      rating,
+      category_id,
+      seller_id,
+      stock_amount,
+      updated_by,
+      id,
+    ]);
+    res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (err) {
+    res.json(err.stack);
+  }
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   getSingleProductById,
+  updateProductById,
 };
