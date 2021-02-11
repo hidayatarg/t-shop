@@ -4,6 +4,7 @@ const createProductQuery =
   "INSERT INTO products (name, price, description, rating, category_id, seller_id, stock_amount, created_date, created_by, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7, Now(), $8, true) RETURNING *";
 const getProductByIdQuery = "SELECT * FROM products WHERE id = $1";
 
+// GetAllProducts => api/v1/products
 const getAllProducts = async (req, res, next) => {
   try {
     const result = await pool.query(getAllProductsQuery);
@@ -16,6 +17,7 @@ const getAllProducts = async (req, res, next) => {
   }
 };
 
+// createProduct => api/v1/products/new
 const createProduct = async (req, res, next) => {
   const {
     name,
@@ -48,6 +50,7 @@ const createProduct = async (req, res, next) => {
   }
 };
 
+// getSingleProductById => api/v1/products/:id
 const getSingleProductById = async (req, res, next) => {
   const id = parseInt(req.params.id);
   try {
