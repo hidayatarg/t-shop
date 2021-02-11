@@ -27,3 +27,7 @@ const getProducts = async(req, res, next) => {
         }
 }
 ```
+
+### TODO
+    - Create a Seeder => Not DONE
+    - Create Validator for Post and Put Methods => Not DONE
