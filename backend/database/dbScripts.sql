@@ -63,3 +63,11 @@ CREATE TABLE images(
 	PRIMARY KEY (id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
+
+-- Insert into Categories Table
+INSERT INTO categories(
+	name, description, created_date, created_by, is_active)
+	VALUES 
+	 ( 'Home Devices', null, Now(), 'Hidayat Arghandabi', true),
+	 ( 'Car', null,Now(), 'Hidayat Arghandabi', true),
+	 ( 'Motor Bike',null,Now(), 'Hidayat Arghandabi', true);
