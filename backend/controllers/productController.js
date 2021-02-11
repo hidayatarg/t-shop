@@ -5,6 +5,7 @@ const createProductQuery =
 const getProductByIdQuery = "SELECT * FROM products WHERE id = $1";
 const updateProductByIdQuery =
   "UPDATE products SET name = $1, price = $2, description = $3, rating = $4, category_id = $5, seller_id = $6, stock_amount = $7, updated_date = Now(), updated_by = $8, is_active = true WHERE id = $9 RETURNING *";
+const deleteProductByIdQuery = "DELETE FROM products WHERE id = $1";
 
 // GetAllProducts => api/v1/products
 const getAllProducts = async (req, res, next) => {
@@ -106,9 +107,29 @@ const updateProductById = async (req, res, next) => {
   }
 };
 
+const deleteProductById = async (req, res, next) => {
+  const id = parseInt(req.params.id);
+  try {
+    const result = await pool.query(deleteProductByIdQuery, [id]);
+    if (result.rowCount === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "Not Found"
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: `Product with ${id} has been deleted successfully`
+    });
+  } catch (err) {
+    res.json(err.stack);
+  }
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   getSingleProductById,
   updateProductById,
+  deleteProductById,
 };
