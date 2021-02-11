@@ -1,4 +1,6 @@
 const pool = require("../database/pool");
+const ErrorHandler = require('../utils/errorHandler')
+
 const getAllProductsQuery = "SELECT * FROM products ORDER BY id DESC";
 const createProductQuery =
   "INSERT INTO products (name, price, description, rating, category_id, seller_id, stock_amount, created_date, created_by, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7, Now(), $8, true) RETURNING *";
@@ -59,10 +61,7 @@ const getSingleProductById = async (req, res, next) => {
   try {
     const result = await pool.query(getProductByIdQuery, [id]);
     if (result.rowCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "result not found",
-      });
+      return next(new ErrorHandler('Product Not Found', 404))
     }
     res.status(200).json({
       success: false,
