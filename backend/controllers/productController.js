@@ -1,5 +1,6 @@
 const pool = require("../database/pool");
-const ErrorHandler = require('../utils/errorHandler')
+const ErrorHandler = require('../utils/errorHandler');
+const catchAsyncErrors = require('../middlewares/catchAsyncErrors');
 
 const getAllProductsQuery = "SELECT * FROM products ORDER BY id DESC";
 const createProductQuery =
@@ -23,7 +24,7 @@ const getAllProducts = async (req, res, next) => {
 };
 
 // createProduct => api/v1/products/new
-const createProduct = async (req, res, next) => {
+const createProduct = catchAsyncErrors(async (req, res, next) => {
   const {
     name,
     price,
@@ -53,7 +54,7 @@ const createProduct = async (req, res, next) => {
   } catch (err) {
     res.json(err.stack);
   }
-};
+});
 
 // getSingleProductById => api/v1/products/:id
 const getSingleProductById = async (req, res, next) => {
