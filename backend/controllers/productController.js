@@ -9,18 +9,34 @@ const getProductByIdQuery = 'SELECT * FROM products WHERE id = $1';
 const updateProductByIdQuery =
   'UPDATE products SET name = $1, price = $2, description = $3, rating = $4, category_id = $5, seller_id = $6, stock_amount = $7, updated_date = Now(), updated_by = $8, is_active = true WHERE id = $9 RETURNING *';
 const deleteProductByIdQuery = 'DELETE FROM products WHERE id = $1';
+const findProductByNameKeywordsQuery =
+  'SELECT * FROM products WHERE LOWER(name) LIKE';
 
 // GetAllProducts => api/v1/products
+// GetAllProducts => api/v1/products?keyword = apple
 const getAllProducts = async (req, res, next) => {
-  try {
-    const result = await pool.query(getAllProductsQuery);
-    res.status(200).json({
+  const { keyword } = req.query;
+  if (keyword) {
+    const result = await pool.query(
+      findProductByNameKeywordsQuery + "'%" + keyword + "%'"
+    );
+    if (result.rowCount === 0) {
+      return next(new ErrorHandler('Product Not Found', 200));
+    }
+
+    return res.status(200).json({
       success: true,
       data: result.rows,
     });
-  } catch (err) {
-    res.json(err.stack);
   }
+  const result = await pool.query(getAllProductsQuery);
+  if (result.rowCount === 0) {
+    return next(new ErrorHandler('Products Not Found', 200));
+  }
+  res.status(200).json({
+    success: true,
+    data: result.rows,
+  });
 };
 
 // createProduct => api/v1/products/new
