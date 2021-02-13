@@ -58,7 +58,6 @@ const createProduct = async (req, res, next) => {
 // getSingleProductById => api/v1/products/:id
 const getSingleProductById = async (req, res, next) => {
   const id = parseInt(req.params.id);
-  try {
     const result = await pool.query(getProductByIdQuery, [id]);
     if (result.rowCount === 0) {
       return next(new ErrorHandler('Product Not Found', 404))
@@ -67,9 +66,6 @@ const getSingleProductById = async (req, res, next) => {
       success: false,
       data: result.rows,
     });
-  } catch (err) {
-    res.json(err.stack);
-  }
 };
 
 const updateProductById = async (req, res, next) => {
