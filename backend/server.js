@@ -3,6 +3,14 @@ const dotenv = require('dotenv');
 
 const port = process.env.PORT || 3000;
 
+// Handle UncaughtExceptions
+// a is not defined => log(a)
+process.on('uncaughtException', err => {
+  console.log(`Error ${err.message}`);
+  console.log('Shutting down due to uncaught exception');
+  process.exit(1);
+});
+
 // setting config file
 dotenv.config({ path: './config/config.env' });
 
