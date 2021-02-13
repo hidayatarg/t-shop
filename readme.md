@@ -34,3 +34,5 @@ const getProducts = async(req, res, next) => {
 
 ### Seting ENV in MacOSX
 `export NODE_ENV=DEVELOPMENT`
+
+`catchAsyncErrors` is used when try catch is not used to catch the error
