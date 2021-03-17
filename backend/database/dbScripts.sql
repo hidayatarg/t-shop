@@ -83,6 +83,7 @@ CREATE TABLE users(
     id serial NOT NULL,
 	firstname VARCHAR(30),
 	lastname VARCHAR(30),
+	password VARCHAR,
 	avatar VARCHAR(200),
 	email VARCHAR(200),
 	created_date TIMESTAMP,
