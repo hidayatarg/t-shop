@@ -79,6 +79,19 @@ CREATE TABLE images(
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE TABLE users(
+    id serial NOT NULL,
+	firstname VARCHAR(30),
+	lastname VARCHAR(30),
+	avatar VARCHAR(200),
+	email VARCHAR(200),
+	created_date TIMESTAMP,
+	is_active bool,
+	role VARCHAR(30),
+	reset_password_token VARCHAR,
+	reset_password_expire TIMESTAMP
+);
+
 -- Insert data to tables
 INSERT INTO categories(
 	name, description, created_date, created_by, is_active)
@@ -86,3 +99,4 @@ INSERT INTO categories(
 	 ( 'Home Devices', null, Now(), 'Hidayat Arghandabi', true),
 	 ( 'Car', null,Now(), 'Hidayat Arghandabi', true),
 	 ( 'Motor Bike',null,Now(), 'Hidayat Arghandabi', true);
+
