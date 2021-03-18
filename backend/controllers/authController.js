@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { tokenCreator } = require('../utils/tokenCreator');
 
 const createUserQuery = `INSERT INTO users (firstname, lastname, email, password, created_date, is_active, role) VALUES ($1, $2, $3, $4, Now(), true, 'user') RETURNING *`;
+const getUserByEmailQuery = 'SELECT * FROM users WHERE email = $1';
 
 // Register a user => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -26,6 +27,38 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 				token: token,
 			});
 		}
+	} catch (err) {
+		res.json(err.stack);
+	}
+});
+
+// Login a user => /api/v1/login
+exports.loginUser = catchAsyncErrors(async (req, res, next) => {
+	const { email, password } = req.body;
+
+	if (!email && !password) {
+		return next(new ErrorHandler('Please Enter Email and Password', 400));
+	}
+
+	// find user in the Database
+	try {
+		const result = await pool.query(getUserByEmailQuery, [email]);
+		if (result.rowCount === 0) {
+			return next(new ErrorHandler('Invalid Email or Password', 401));
+		}
+
+		// check the password
+		const data = result.rows[0];
+		const isPasswordMatch = await bcrypt.compare(password, data.password);
+		if (!isPasswordMatch) {
+			return next(new ErrorHandler('Invalid Email or Password', 401));
+		}
+
+		const token = tokenCreator(data.id, data.email);
+		res.status(200).json({
+			success: true,
+			token,
+		});
 	} catch (err) {
 		res.json(err.stack);
 	}
