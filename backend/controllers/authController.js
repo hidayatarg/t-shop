@@ -2,7 +2,7 @@ const pool = require('../database/pool');
 const ErrorHandler = require('../utils/errorHandler');
 const catchAsyncErrors = require('../middlewares/catchAsyncErrors');
 const bcrypt = require('bcryptjs');
-const { tokenCreator } = require('../utils/tokenCreator');
+const { sendToken } = require('../utils/sendToken');
 
 const createUserQuery = `INSERT INTO users (firstname, lastname, email, password, created_date, is_active, role) VALUES ($1, $2, $3, $4, Now(), true, 'user') RETURNING *`;
 const getUserByEmailQuery = 'SELECT * FROM users WHERE email = $1';
@@ -20,12 +20,8 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 		]);
 
 		if (result.rows) {
-			const data = result.rows[0];
-			const token = tokenCreator(data.id, data.email);
-			res.status(201).json({
-				success: true,
-				token: token,
-			});
+			const user = result.rows[0];
+			sendToken(user, 201, res);
 		}
 	} catch (err) {
 		res.json(err.stack);
@@ -54,11 +50,8 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 			return next(new ErrorHandler('Invalid Email or Password', 401));
 		}
 
-		const token = tokenCreator(data.id, data.email);
-		res.status(200).json({
-			success: true,
-			token,
-		});
+		const user = result.rows[0];
+		sendToken(user, 201, res);
 	} catch (err) {
 		res.json(err.stack);
 	}
