@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secretKey = 'VeryHardSecretKey';
+const { SECRET_KEY } = require('../config/configurationConst');
 
 exports.tokenCreator = (id, username, sessionTime = '24h') => {
 	const signProperties = {
@@ -11,5 +11,5 @@ exports.tokenCreator = (id, username, sessionTime = '24h') => {
 		expiresIn: sessionTime,
 	};
 
-	return jwt.sign(signProperties, secretKey, options);
+	return jwt.sign(signProperties, SECRET_KEY, options);
 };
