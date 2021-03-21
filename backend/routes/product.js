@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { isAuthenticatedUser } = require('../middlewares/auth');
+const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
 const {
 	getAllProducts,
@@ -11,7 +11,9 @@ const {
 	deleteProductById,
 } = require('../controllers/productController');
 
-router.route('/products').get(getAllProducts);
+router
+	.route('/products')
+	.get(isAuthenticatedUser, authorizeRoles('admin'), getAllProducts);
 router.route('/products/:id').get(getSingleProductById);
 router.route('/admin/products/new').post(isAuthenticatedUser, createProduct);
 

@@ -37,7 +37,7 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 		const decoded = jwt.verify(token, SECRET_KEY);
 		console.log('Decoded User: ', decoded);
 		// check the avaliablity in database
-		req.user = await pool.query(getUserByIdQuery, [decoded.id]);
+		req.user = await (await pool.query(getUserByIdQuery, [decoded.id])).rows[0];
 		next();
 	} catch (err) {
 		console.log('error: ', err.stack);
@@ -45,4 +45,19 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 			error: 'Not Authorized to Make Rquest',
 		});
 	}
+};
+
+// Handling user roles
+exports.authorizeRoles = (...roles) => {
+	return (req, res, next) => {
+		if (!roles.includes(req.user.role)) {
+			return next(
+				new ErrorHandler(
+					`Role (${req.user.role}) is not allowed to access this resource`,
+					403
+				)
+			);
+		}
+		next();
+	};
 };
