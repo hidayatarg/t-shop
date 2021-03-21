@@ -11,13 +11,13 @@ const {
 	deleteProductById,
 } = require('../controllers/productController');
 
-router.route('/products').get(isAuthenticatedUser, getAllProducts);
-router.route('/products/:id').get(isAuthenticatedUser, getSingleProductById);
-router.route('/admin/products/new').post(createProduct);
+router.route('/products').get(getAllProducts);
+router.route('/products/:id').get(getSingleProductById);
+router.route('/admin/products/new').post(isAuthenticatedUser, createProduct);
 
 router
 	.route('/admin/products/:id')
-	.put(updateProductById)
-	.delete(deleteProductById);
+	.put(isAuthenticatedUser, updateProductById)
+	.delete(isAuthenticatedUser, deleteProductById);
 
 module.exports = router;
