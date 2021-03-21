@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const catchAsyncErrors = require('./catchAsyncErrors');
 const pool = require('../database/pool');
 const { SECRET_KEY } = require('../config/configurationConst');
+const ErrorHandler = require('../utils/errorHandler');
 
 const getUserByIdQuery = 'SELECT * FROM users WHERE id = $1';
 
@@ -20,6 +21,10 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 
     }
 	*/
+	if (!req.headers.cookie) {
+		return next(new ErrorHandler('Login first to access this resource', 401));
+	}
+
 	const token = req.headers.cookie.split('token=')[1];
 
 	console.log('token: ', token);
