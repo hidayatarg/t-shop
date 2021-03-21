@@ -39,6 +39,7 @@ CREATE TABLE products(
 	rating smallint,
 	category_id int,
 	seller_id int,
+	user_id int,
     stock_amount int,
 	created_date TIMESTAMP,
 	created_by VARCHAR(30),
@@ -47,7 +48,8 @@ CREATE TABLE products(
 	is_active bool,
 	PRIMARY KEY (id),
 	FOREIGN KEY (category_id) REFERENCES categories(id),
-	FOREIGN KEY (seller_id) REFERENCES sellers(id)
+	FOREIGN KEY (seller_id) REFERENCES sellers(id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE reviews(
@@ -101,3 +103,6 @@ INSERT INTO categories(
 	 ( 'Car', null,Now(), 'Hidayat Arghandabi', true),
 	 ( 'Motor Bike',null,Now(), 'Hidayat Arghandabi', true);
 
+
+-- Add user_id column to products table in psql
+ALTER TABLE products ADD user_id int

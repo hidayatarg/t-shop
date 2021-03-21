@@ -4,7 +4,7 @@ const catchAsyncErrors = require('../middlewares/catchAsyncErrors');
 
 const getAllProductsQuery = 'SELECT * FROM products ORDER BY id DESC';
 const createProductQuery =
-	'INSERT INTO products (name, price, description, rating, category_id, seller_id, stock_amount, created_date, created_by, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7, Now(), $8, true) RETURNING *';
+	'INSERT INTO products (name, price, description, rating, category_id, seller_id, stock_amount, created_date, created_by, is_active, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, Now(), $8, true, $9) RETURNING *';
 const getProductByIdQuery = 'SELECT * FROM products WHERE id = $1';
 const updateProductByIdQuery =
 	'UPDATE products SET name = $1, price = $2, description = $3, rating = $4, category_id = $5, seller_id = $6, stock_amount = $7, updated_date = Now(), updated_by = $8, is_active = true WHERE id = $9 RETURNING *';
@@ -52,6 +52,8 @@ const createProduct = catchAsyncErrors(async (req, res, next) => {
 		created_by,
 	} = req.body;
 
+	req.body.user_id = req.user.id;
+
 	try {
 		const result = await pool.query(createProductQuery, [
 			name,
@@ -62,6 +64,7 @@ const createProduct = catchAsyncErrors(async (req, res, next) => {
 			seller_id,
 			stock_amount,
 			created_by,
+			user_id,
 		]);
 		res.status(201).json({
 			success: true,
