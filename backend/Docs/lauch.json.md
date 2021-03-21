@@ -1,0 +1,19 @@
+This is the testing enviorment lunch.json file Example. It will load the enviorment varaibles
+
+```json
+{
+	// Project runtime configuration
+	// 03/21/2021 By Hidayet Arghandabi
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch Program",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${workspaceFolder}/backend/server.js",
+			"envFile": "${workspaceFolder}/backend/config/config.env"
+		}
+	]
+}
+```

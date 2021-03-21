@@ -43,3 +43,7 @@ const getProducts = async (req, res, next) => {
 `catchAsyncErrors` is used when try catch is not used to catch the error
 
 RUN TIME `"program": "${workspaceFolder}/backend/server.js"`
+
+## Send Mail
+
+MailTrap is used to send mail to customers.

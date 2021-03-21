@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-exports.resetPasswordToken = () => {
+exports.resetPasswordToken = async (user) => {
 	// Generate token
 	const restToken = crypto.randomBytes(20).tostring('hex');
 
@@ -13,5 +13,5 @@ exports.resetPasswordToken = () => {
 	// Set token expire time and save to the database
 	const resetPasswordExpire = Date.now() + 30 * 60 * 1000;
 
-	return restToken;
+	return { resetToken, resetpasswordToken, resetPasswordExpire };
 };
