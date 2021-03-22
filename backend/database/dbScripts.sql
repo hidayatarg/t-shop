@@ -92,7 +92,7 @@ CREATE TABLE users(
 	is_active bool,
 	role VARCHAR(30),
 	reset_password_token VARCHAR,
-	reset_password_expire TIMESTAMP
+	reset_password_expire BIGINT
 );
 
 -- Insert data to tables

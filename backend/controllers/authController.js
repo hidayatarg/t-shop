@@ -5,8 +5,11 @@ const bcrypt = require('bcryptjs');
 const { sendToken } = require('../utils/sendToken');
 const { resetPasswordToken } = require('../utils/security');
 const { sendEmail } = require('../utils/sendEmail');
+
+// Queries
 const createUserQuery = `INSERT INTO users (firstname, lastname, email, password, created_date, is_active, role) VALUES ($1, $2, $3, $4, Now(), true, 'user') RETURNING *`;
 const getUserByEmailQuery = 'SELECT * FROM users WHERE email = $1';
+const updateUserResetTokenByIdQuery = `UPDATE users SET reset_password_token = $1, reset_password_expire = $2 WHERE id = $3`;
 
 // Register a user => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -83,7 +86,7 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 	const data = user.rows[0];
 
 	// Get reset token
-	const reset = await resetPasswordToken(data);
+	const reset = await resetPasswordToken();
 
 	// Create reset password url
 	const resetUrl = `${req.protocol}://${req.get(
@@ -93,6 +96,13 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 	const message = `Your password reset token is as follows:\n\n${resetUrl}\n\nIf you have not requested this email, ignore it.`;
 
 	try {
+		// update the user password token and expire
+		await pool.query(updateUserResetTokenByIdQuery, [
+			reset.resetPasswordToken,
+			reset.resetPasswordExpire,
+			data.id,
+		]);
+
 		await sendEmail({
 			email: data.email,
 			subject: 'T Shop Password Recovery',
