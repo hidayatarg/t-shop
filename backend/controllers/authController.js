@@ -5,11 +5,14 @@ const bcrypt = require('bcryptjs');
 const { sendToken } = require('../utils/sendToken');
 const { resetPasswordToken } = require('../utils/security');
 const { sendEmail } = require('../utils/sendEmail');
+const crypto = require('crypto');
 
 // Queries
 const createUserQuery = `INSERT INTO users (firstname, lastname, email, password, created_date, is_active, role) VALUES ($1, $2, $3, $4, Now(), true, 'user') RETURNING *`;
 const getUserByEmailQuery = 'SELECT * FROM users WHERE email = $1';
 const updateUserResetTokenByIdQuery = `UPDATE users SET reset_password_token = $1, reset_password_expire = $2 WHERE id = $3`;
+const updateUserPasswordByIdQuery = `UPDATE users SET password = $1, reset_password_token = null, reset_password_expire = null WHERE id = $2`;
+const getUserByPasswordTokenQuery = `SELECT * FROM users WHERE reset_password_token = $1 and reset_password_expire > $2`;
 
 // Register a user => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -117,6 +120,43 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 		reset.resetpasswordToken = undefined;
 		reset.resetPasswordExpire = undefined;
 		// Return error
+		return next(new ErrorHandler(err.message, 500));
+	}
+});
+
+// Reset Password => /api/v1/password/reset/:token
+exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
+	const resetPasswordToken = crypto
+		.createHash('sha256')
+		.update(req.params.token)
+		.digest('hex');
+
+	const user = await pool.query(getUserByPasswordTokenQuery, [
+		resetPasswordToken,
+		Date.now(),
+	]);
+
+	if (user.rowCount === 0) {
+		return next(
+			new ErrorHandler('Password reset token is invalid or has expired', 400)
+		);
+	}
+
+	if (req.body.password !== req.body.confirmPassword) {
+		return next(new ErrorHandler('Password does not match', 400));
+	}
+
+	// Set up new password and Save
+	try {
+		const userData = user.rows[0];
+		const encryptedPassword = await bcrypt.hash(req.body.password, 10);
+
+		await pool.query(updateUserPasswordByIdQuery, [
+			encryptedPassword,
+			userData.id,
+		]);
+		sendToken(userData, 200, res);
+	} catch (err) {
 		return next(new ErrorHandler(err.message, 500));
 	}
 });
