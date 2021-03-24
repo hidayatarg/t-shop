@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const createUserQuery = `INSERT INTO users (firstname, lastname, email, password, created_date, is_active, role) VALUES ($1, $2, $3, $4, Now(), true, 'user') RETURNING *`;
 const getUserByEmailQuery = 'SELECT * FROM users WHERE email = $1';
 const getUserByIdQuery = `SELECT id, firstname, lastname, email, created_date, avatar, role FROM users WHERE id = $1`;
+const getUserAllDetailsByIdQuery = `SELECT * FROM users WHERE id = $1`;
 const updateUserResetTokenByIdQuery = `UPDATE users SET reset_password_token = $1, reset_password_expire = $2 WHERE id = $3`;
 const updateUserPasswordByIdQuery = `UPDATE users SET password = $1, reset_password_token = null, reset_password_expire = null WHERE id = $2`;
 const getUserByPasswordTokenQuery = `SELECT * FROM users WHERE reset_password_token = $1 and reset_password_expire > $2`;
@@ -171,4 +172,23 @@ exports.getUserProfile = catchAsyncErrors(async (req, res, next) => {
 		success: true,
 		user,
 	});
+});
+
+// Update / change password => /api/v1/password/update
+exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
+	const user = await (
+		await pool.query(getUserAllDetailsByIdQuery, [req.user.id])
+	)?.rows[0];
+	const isPasswordMatch = await bcrypt.compare(
+		req.body.oldPassword,
+		user.password
+	);
+	if (!isPasswordMatch) {
+		return next(new ErrorHandler('Old password mismatch.', 400));
+	}
+
+	// update the password in database
+	const encryptedPassword = await bcrypt.hash(req.body.password, 10);
+	await pool.query(updateUserPasswordByIdQuery, [encryptedPassword, user.id]);
+	sendToken(user, 200, res);
 });
