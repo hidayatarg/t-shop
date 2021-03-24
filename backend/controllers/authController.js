@@ -10,6 +10,7 @@ const crypto = require('crypto');
 // Queries
 const createUserQuery = `INSERT INTO users (firstname, lastname, email, password, created_date, is_active, role) VALUES ($1, $2, $3, $4, Now(), true, 'user') RETURNING *`;
 const getUserByEmailQuery = 'SELECT * FROM users WHERE email = $1';
+const getUserByIdQuery = `SELECT id, firstname, lastname, email, created_date, avatar, role FROM users WHERE id = $1`;
 const updateUserResetTokenByIdQuery = `UPDATE users SET reset_password_token = $1, reset_password_expire = $2 WHERE id = $3`;
 const updateUserPasswordByIdQuery = `UPDATE users SET password = $1, reset_password_token = null, reset_password_expire = null WHERE id = $2`;
 const getUserByPasswordTokenQuery = `SELECT * FROM users WHERE reset_password_token = $1 and reset_password_expire > $2`;
@@ -159,4 +160,15 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
 	} catch (err) {
 		return next(new ErrorHandler(err.message, 500));
 	}
+});
+
+// Get currently logged user details => /api/v1/me
+exports.getUserProfile = catchAsyncErrors(async (req, res, next) => {
+	// in the auth middleware we add user details in req.user
+	const user = await (await pool.query(getUserByIdQuery, [req.user.id]))
+		?.rows[0];
+	res.status(200).json({
+		success: true,
+		user,
+	});
 });
