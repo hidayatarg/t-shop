@@ -16,6 +16,7 @@ const updateUserResetTokenByIdQuery = `UPDATE users SET reset_password_token = $
 const updateUserPasswordByIdQuery = `UPDATE users SET password = $1, reset_password_token = null, reset_password_expire = null WHERE id = $2`;
 const getUserByPasswordTokenQuery = `SELECT * FROM users WHERE reset_password_token = $1 and reset_password_expire > $2`;
 const updateUserProfileByIdQuery = `UPDATE users SET firstname = $1, lastname = $2, email = $3 WHERE id = $4`;
+const getAllusersQuery = `SELECT * FROM users where is_active = true`;
 
 // Register a user => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -197,7 +198,7 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
 // Update user profile => /api/v1/me/update
 exports.updateUserProfile = catchAsyncErrors(async (req, res, next) => {
 	const { firstname, lastname, email } = req.body;
-
+	// TODO: Update user avatar
 	if (!firstname && !lastname && !email) {
 		return next(
 			new ErrorHandler('Firstname, lastname and email are required.')
@@ -213,5 +214,16 @@ exports.updateUserProfile = catchAsyncErrors(async (req, res, next) => {
 
 	res.status(200).json({
 		success: true,
+	});
+});
+
+// Admin routes
+// Get all users => /api/v1/admin/users
+exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
+	const users = (await pool.query(getAllusersQuery)).rows;
+
+	res.status(200).json({
+		success: true,
+		users,
 	});
 });
