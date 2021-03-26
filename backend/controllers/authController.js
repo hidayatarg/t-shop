@@ -17,6 +17,9 @@ const updateUserPasswordByIdQuery = `UPDATE users SET password = $1, reset_passw
 const getUserByPasswordTokenQuery = `SELECT * FROM users WHERE reset_password_token = $1 and reset_password_expire > $2`;
 const updateUserProfileByIdQuery = `UPDATE users SET firstname = $1, lastname = $2, email = $3 WHERE id = $4`;
 const getAllusersQuery = `SELECT * FROM users where is_active = true`;
+// Admin Queries
+// TODO: Add an Update Field for the Users Table
+const updateUserDetailsByIdQuery = `UPDATE users SET firstname = $1, lastname = $2, email = $3, is_active = $4, role = $5 WHERE id = $6`;
 
 // Register a user => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -242,5 +245,31 @@ exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
 	res.status(200).json({
 		success: true,
 		user,
+	});
+});
+
+// Update user details => /api/v1/admin/user/:id
+exports.updateUserDetails = catchAsyncErrors(async (req, res, next) => {
+	const user = await (await pool.query(getUserByIdQuery, [req.user.id]))
+		?.rows[0];
+
+	if (!user) {
+		new ErrorHandler(`User was not found with id: ${req.params.id}`);
+	}
+
+	const { firstname, lastname, email, isActive, role } = req.body;
+	// TODO: Add a validation here
+
+	await pool.query(updateUserDetailsByIdQuery, [
+		firstname,
+		lastname,
+		email,
+		isActive,
+		role,
+		req.user.id,
+	]);
+
+	res.status(200).json({
+		success: true,
 	});
 });
