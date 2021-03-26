@@ -230,12 +230,12 @@ exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
 
 // Get user details => /api/v1/admin/user/:id
 exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
-	const user = await (await pool.query(getUserByIdQuery, [req.user.id]))
+	const user = await (await pool.query(getUserByIdQuery, [req.params.id]))
 		?.rows[0];
 
 	if (!user) {
 		return next(
-			new ErrorHandler(`User was not found with id ${req.params.id}`)
+			new ErrorHandler(`User was not found with id: ${req.params.id}`)
 		);
 	}
 
