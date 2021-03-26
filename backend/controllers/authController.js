@@ -20,6 +20,7 @@ const getAllusersQuery = `SELECT * FROM users where is_active = true`;
 // Admin Queries
 // TODO: Add an Update Field for the Users Table
 const updateUserDetailsByIdQuery = `UPDATE users SET firstname = $1, lastname = $2, email = $3, is_active = $4, role = $5 WHERE id = $6`;
+const deleteUserByIdQuery = `DELETE FROM users WHERE id = $1`;
 
 // Register a user => /api/v1/register
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -271,5 +272,23 @@ exports.updateUserDetails = catchAsyncErrors(async (req, res, next) => {
 
 	res.status(200).json({
 		success: true,
+		message: `User with id: ${req.params.id} was updated successfully.`,
+	});
+});
+
+// Delete user => /api/v1/admin/user/:id
+exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
+	const user = await (await pool.query(getUserByIdQuery, [req.params.id]))
+		?.rows[0];
+
+	if (!user) {
+		new ErrorHandler(`User was not found with id: ${req.params.id}`);
+	}
+
+	await pool.query(deleteUserByIdQuery, [req.params.id]);
+
+	res.status(200).json({
+		success: true,
+		message: `User with id: ${req.params.id} was deleted successfully.`,
 	});
 });
