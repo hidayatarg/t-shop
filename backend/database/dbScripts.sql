@@ -34,7 +34,7 @@ CREATE TABLE sellers(
 CREATE TABLE products(
 	id serial NOT NULL,
 	name VARCHAR(30),
-	price smallint,
+	price decimal default (0.0),
 	description VARCHAR(400),
 	rating smallint,
 	category_id int,
@@ -51,6 +51,50 @@ CREATE TABLE products(
 	FOREIGN KEY (seller_id) REFERENCES sellers(id),
 	FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE table orders(
+	id serial NOT NULL,
+	name VARCHAR,
+	payment_status VARCHAR(40),
+	payment_date Timestamp,
+	items_price decimal,
+	tax_price decimal,
+	shipping_price decimal,
+	total_price decimal,
+	order_status VARCHAR,
+	deliver_date Timestamp,
+	created_date TIMESTAMP,
+	address_id int,
+	order_items_id int,
+	PRIMARY KEY (id),
+	FOREIGN KEY (address_id) REFERENCES address(id),
+	FOREIGN KEY (order_items_id) REFERENCES order_items(id),
+)
+
+CREATE TABLE address(
+	id serial NOT NULL,
+	name VARCHAR(250),
+	city VARCHAR(50),
+	county VARCHAR(50),
+	village VARCHAR(50),
+	street VARCHAR(50),
+	building VARCHAR(50),
+	apartment VARCHAR(50),
+	postal_code INT,
+	user_id INT,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+)
+
+CREATE TABLE order_items(
+	id serial NOT NULL,
+	name VARCHAR(100),
+	quantity INT,
+	price decimal,
+	product_id INT,
+	PRIMARY KEY (id),
+	FOREIGN KEY (product_id) REFERENCES products(id),
+)
 
 CREATE TABLE reviews(
     id serial NOT NULL,
@@ -94,7 +138,8 @@ CREATE TABLE users(
 	reset_password_token VARCHAR,
 	reset_password_expire BIGINT
 );
-
+-- seller table should have a user id
+-- order table should have a user id
 -- Insert data to tables
 INSERT INTO categories(
 	name, description, created_date, created_by, is_active)
